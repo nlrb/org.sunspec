@@ -1,0 +1,27 @@
+{
+	"pair": {
+		"inverter": {
+			"name": "Add SunSpec Solar Inverter",
+			"title": "SunSpec",
+			"explain": "Modern solar panels support information in compliance with the SunSpec protocol via ModBus/TCP. Once you add an inverter device, you can view the power production and other information of your solar panels. First let us where to find the information. We need to know the location of the network location as well as the ModBus parameters.",
+			"network": {
+				"title": "Network",
+				"ip": "IP address : port"
+			},
+			"modbus": {
+				"title": "ModBus",
+				"id": "ID number",
+				"base": "Base address"
+			},
+			"search": {
+				"title": "Searching for SunSpec information on __addr__...",
+				"success": "Found your SunSpec device!",
+				"failed": "Unable to locate the SunSpec information on __addr__!",
+				"completed": "Device information found. You can now add the device."
+			},
+			"submit": "Search",
+			"config": "Device configuration",
+			"add": "Add device"
+		}
+	}
+}

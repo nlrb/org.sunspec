@@ -1,0 +1,35 @@
+{
+    "id": "org.sunspec",
+    "name": {
+        "en": "SunSpec Solar Monitoring"
+    },
+    "version": "0.0.1",
+    "compatibility": "*",
+    "author": {
+        "name": "Ramón Baas"
+    },
+	"category": "climate",
+	"images": {
+		"large": "assets/images/large.png",
+		"small": "assets/images/small.png"
+	},
+	"drivers": [
+		{
+			"id": "inverter",
+			"name": {
+				"en": "Inverter"
+			},
+			"class": "sensor",
+			"capabilities": [ "measure_power", "meter_power", "measure_temperature" ],
+			"images": {
+				"large": "drivers/inverter/assets/images/large.png",
+				"small": "drivers/inverter/assets/images/small.png"
+			},
+			"pair": [
+				{
+					"id": "inverter"
+				}
+			]
+		}
+	]
+}

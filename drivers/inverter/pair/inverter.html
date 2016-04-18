@@ -1,0 +1,142 @@
+<style>
+	.message {
+		background: #f8f8f8;
+		display: none;
+	}
+	.message-bar {
+		font-style: italic;
+		font-weight: bolder;
+	}
+	.oneline {
+		display: inline-flex;
+		align-items: center;
+	}
+	.regular {
+		border: 1px solid #aaa;
+		padding: .25em .5em;
+		border-radius: 2px;
+		margin: 2px;
+	}
+	.network-input {
+		margin-left: 10px;
+	}
+	.network-ip {
+		width: 100px;
+	}
+	.network-port {
+		width: 40px;
+	}
+	.network .ng-invalid{
+		border: 1px solid red;
+	}
+</style>
+<script type="application/javascript"> 
+	var timeout;
+	var msgPromise;
+	var device;
+	
+	// Display message to the user
+	function displayMessage(text, remove) {
+		if (msgPromise != null) {
+			clearTimeout(msgPromise);
+		}
+		$('#messageContent').text(text);
+		$('#message').slideDown();
+		if (remove) {
+			msgPromise = setTimeout(function() {
+				$('#messageContent').text('');
+				$('#message').slideUp();
+			}, 5000);
+		}
+	}
+	
+	Homey.setTitle(__('pair.inverter.name')); 
+
+	// Save the configuration
+	function formSave(form) {
+		var ip = $('#ip').val();
+		var port = $('#port').val();
+		var mbId = $('#id').val();
+		var mbBase = $('#base').val();
+		var address = ip + ':' + port + ' (ModBus id/base: ' + mbId + '/' + mbBase + ')';
+		// Search for SunSpec inverter
+		displayMessage(__('pair.inverter.search.title', { addr: address }), false);
+		Homey.emit('search', { 'ip': ip, 'port': port, 'id': mbId, 'base': mbBase }, function(err, ok) {
+			console.log('Search emitted: ' + err);
+		});
+		$('#search_button').hide();
+	}
+
+	// Add the device when the user gives the OK
+	function addDevice() {
+		Homey.addDevice(device, function(err, result) {
+			if (err) { 
+				console.log(err); 
+			} else {
+				Homey.emit('completed', device);
+			}
+			Homey.done();
+		});
+	}
+	
+	// Activated when device is found or not
+	Homey.on("found", function(data) {
+		if (data.found) {
+			console.log(data);
+			if (data.id != null) {
+				device = data.device;
+				displayMessage(__('pair.inverter.search.completed'), true);
+				$('#config').show();
+				// Display configuration items
+				for (var i =0; i < data.show.length; i++) {
+					var item = data.show[i];
+					var newItem = $('<div id="config' + i + '">' + item.name + ': ' + item.val + '</div>');
+					newItem.appendTo('#configuration');
+				}
+				$('#add_button').show();
+			} else {
+				displayMessage(__('pair.inverter.search.success'), true);
+			}
+		} else {
+			var ip = $('#ip').val();
+			var port = $('#port').val();
+			var mbId = $('#id').val();
+			var mbBase = $('#base').val();
+			var address = ip + ':' + port + ' (ModBus id/base: ' + mbId + '/' + mbBase + ')';
+			displayMessage(__('pair.inverter.search.failed', { addr: address }), true);
+			$('#search_button').show();
+		}
+	}); 
+</script> 
+
+<fieldset id="message" class="message">
+	<legend>Message</legend>
+	<div id="messageContent" class="message-bar">
+	</div>
+</fieldset>
+<fieldset> 
+	<legend data-i18n="pair.inverter.title"></legend>
+	<div style="overflow: auto">
+		<img src="../assets/icon.svg" align="left" style="margin-right: 10px" width="150px"><p data-i18n="pair.inverter.explain"></p>
+	</div>
+	<form name="sunspecForm" class="network" action="javascript: formSave(sunspecForm)">
+		<fieldset> 
+			<legend data-i18n="pair.inverter.network.title"></legend>
+			<div class="oneline"><label for="network-ip" data-i18n="pair.inverter.network.ip"></label><input class="network-input network-ip regular" id="ip" placeholder="0.0.0.0" ng-pattern="/^([0-9]{1,3})[.]([0-9]{1,3})[.]([0-9]{1,3})[.]([0-9]{1,3})$/" required/></div>
+			&nbsp;&nbsp;&nbsp;:
+			<div class="oneline"><input class="network-input network-port regular" id="port" placeholder="23" ng-pattern="/^\d+$/" required/></div>
+		</fieldset>
+		<fieldset> 
+			<legend data-i18n="pair.inverter.modbus.title"></legend>
+			<div><label data-i18n="pair.inverter.modbus.id"></label><input class="network-input network-port regular" id="id" placeholder="1" ng-pattern="/^\d+$/" required/></div>
+			<div><label data-i18n="pair.inverter.modbus.base"></label><input class="network-input network-port regular" id="base" placeholder="40000" ng-pattern="/^\d+$/" required/></div>
+		</fieldset>
+		<button type="submit" id="search_button" class="button" data-i18n="pair.inverter.submit"></button>
+	</form>
+	<fieldset id="config" style="display:none">
+		<legend data-i18n="pair.inverter.config"></legend>
+		<div id="configuration">
+		</div>
+	</fieldset>
+	<button type="submit" id="add_button" class="button" data-i18n="pair.inverter.add" onClick="javascript:addDevice()" style="display:none"></button>
+</fieldset>
