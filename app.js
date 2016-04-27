@@ -1,7 +1,12 @@
 "use strict";
 
+var SunSpec = require('sunspec-api');
+
 function init() {
 	Homey.log("SunSpec Solar App starting");
 }
 
-module.exports.init = init;
+module.exports = {
+	api: { pollValues: SunSpec.pollValues },
+	init: init
+}

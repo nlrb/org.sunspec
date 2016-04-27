@@ -5,6 +5,10 @@
     },
     "version": "0.0.1",
     "compatibility": "*",
+	"description": {
+		"en": "Read SunSpec data from a Solar Inverter.",
+		"nl": "Bekijk SunSpec data van je zonnepanelen omvormer."
+	},
     "author": {
         "name": "Ramón Baas"
     },
@@ -31,5 +35,8 @@
 				}
 			]
 		}
-	]
+	],
+	"permissions": [
+        "homey:app:nl.dsmr.p1"
+    ]
 }
