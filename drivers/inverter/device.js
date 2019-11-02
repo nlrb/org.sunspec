@@ -29,8 +29,7 @@ class SunSpecDevice extends Homey.Device {
   			Homey.ManagerApi.put('/app/nl.dsmr.p1/register/', { id: id, callback: '/app/org.sunspec/poll/' }, (err, result) => {
   				this.log('Registration', err, ':', result);
   			});
-  		}
-    }
+		}
     this.log('Device', this.getData(), 'started');
   }
 
