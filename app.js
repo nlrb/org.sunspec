@@ -24,7 +24,7 @@ class SunSpecApp extends Homey.App {
 		let inverter = this.driver.getInverter(id);
 		let result = 'Unknown inverter ' + id;
 		if (inverter) {
-			result = inverter.values;
+			result = inverter.getValues();
 		}
 		return result;
 	}
