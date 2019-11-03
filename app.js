@@ -8,7 +8,6 @@ class SunSpecApp extends Homey.App {
 	onInit() {
 		this.driver = Homey.ManagerDrivers.getDriver('inverter');
 		this.log('SunSpec Solar App is running...');
-		//SunSpec.setDebug(true);
 	}
 
 	pollValues(id) {
@@ -16,7 +15,7 @@ class SunSpecApp extends Homey.App {
 		let result = 'Unknown inverter ' + id;
 		if (inverter) {
 			inverter.pollModBus();
-			result = 'Polled values for ' + id
+			result = 'Polled values for ' + id;
 		}
 		return result;
 	}
