@@ -19,7 +19,7 @@ class SunSpecDevice extends Homey.Device {
     let settings = this.getSettings();
     this.inverter = new SunSpec(settings.ip, settings.port, settings.idModBus, settings.baseModBus, this.log);
     this.interval = settings.interval;
-    this.registerEvents()
+    this.registerEvents();
     // Set up timer
     if (this.interval > 0) {
       this.timer = setInterval(() => { this.inverter.pollModBus() }, 1000 * this.interval);
@@ -31,12 +31,37 @@ class SunSpecDevice extends Homey.Device {
   			});
 		}
     this.log('Device', this.getData(), 'started');
+    this.setAvailable()
+      .catch(e => error.log(e))
   }
 
   onDeleted() {
     clearTimeout(this.timer);
 		this.inverter.closeConnection();
 	}
+
+  onSettings(oldSettings, newSettings, changedKeys, callback) {
+    // Uodate the timer if the interval setting has changed
+    if (changedKeys.includes('interval')) {
+      clearTimeout(this.timer);
+      this.interval = newSettings.interval;
+      this.timer = setInterval(() => { this.inverter.pollModBus() }, 1000 * this.interval);
+      callback(null, true);
+    }
+    // Check new connection if IP/port, base or ModBusId changed
+    if (['ip', 'port', 'idModBus', 'baseModBus'].some(x => changedKeys.includes(x))) {
+      let newInverter = new SunSpec(newSettings.ip, newSettings.port, newSettings.idModBus, newSettings.baseModBus, this.log);
+      newInverter.on('found', data => {
+        this.log('Result of updated data', data);
+        if (data.found) {
+          this.inverter.closeConnection();
+          delete this.inverter;
+          this.inverter = newInverter;
+        }
+        callback((data.found ? null : new Error('Inverter communication failed')), data.found);
+      })
+    }
+  }
 
   registerEvents() {
     this.inverter.on('INV.W', value => {
@@ -71,6 +96,10 @@ class SunSpecDevice extends Homey.Device {
 				});
 			}
 		});
+    this.inverter.on('available', available => {
+      let func = available ? this.setAvailable() : this.setUnavailable();
+      func.catch(this.error);
+    })
   }
 
 }

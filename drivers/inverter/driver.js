@@ -19,8 +19,8 @@ class SunSpecDriver extends Homey.Driver {
 
 	onPair(socket) {
 		this.log('SunSpec Inverter pairing has started...');
-		let completed = false
-		let inverter
+		let completed = false;
+		let inverter;
 
 		// Search for the SunSpec Inverter once we received IP address and port
 		socket.on('search', (data, callback) => {
@@ -63,7 +63,7 @@ class SunSpecDriver extends Homey.Driver {
 		})
 
 		// Fully add Inverter when successful
-		socket.on('completed', function(device_data) {
+		socket.on('completed', (device_data) => {
 			inverter.closeConnection();
 			completed = true;
 		});
