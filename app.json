@@ -3,7 +3,7 @@
   "name": {
     "en": "SunSpec Solar Monitoring"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "compatibility": ">=1.5.0",
   "sdk": 2,
 	"description": {
