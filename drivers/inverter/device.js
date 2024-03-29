@@ -26,7 +26,7 @@ class SunSpecDevice extends Homey.Device {
     } else if (this.interval === 0) {
       // Register inverter as producer with DSMR
   			this.log('Registering inverter with DSMR');
-  			Homey.ManagerApi.put('/app/nl.dsmr.p1/register/', { id: id, callback: '/app/org.sunspec/poll/' }, (err, result) => {
+  			this.homey.api.put('/app/nl.dsmr.p1/register/', { id: id, callback: '/app/org.sunspec/poll/' }, (err, result) => {
   				this.log('Registration', err, ':', result);
   			});
 		}
@@ -40,27 +40,33 @@ class SunSpecDevice extends Homey.Device {
 		this.inverter.closeConnection();
 	}
 
-  onSettings(oldSettings, newSettings, changedKeys, callback) {
-    // Uodate the timer if the interval setting has changed
-    if (changedKeys.includes('interval')) {
-      clearTimeout(this.timer);
-      this.interval = newSettings.interval;
-      this.timer = setInterval(() => { this.inverter.pollModBus() }, 1000 * this.interval);
-      callback(null, true);
-    }
-    // Check new connection if IP/port, base or ModBusId changed
-    if (['ip', 'port', 'idModBus', 'baseModBus'].some(x => changedKeys.includes(x))) {
-      let newInverter = new SunSpec(newSettings.ip, newSettings.port, newSettings.idModBus, newSettings.baseModBus, this.log);
-      newInverter.on('found', data => {
-        this.log('Result of updated data', data);
-        if (data.found) {
-          this.inverter.closeConnection();
-          delete this.inverter;
-          this.inverter = newInverter;
-        }
-        callback((data.found ? null : new Error('Inverter communication failed')), data.found);
-      })
-    }
+  onSettings({ oldSettings, newSettings, changedKeys }) {
+    return new Promise((resolve, reject) => {
+      // Uodate the timer if the interval setting has changed
+      if (changedKeys.includes('interval')) {
+        clearTimeout(this.timer);
+        this.interval = newSettings.interval;
+        this.timer = setInterval(() => { this.inverter.pollModBus() }, 1000 * this.interval);
+        resolve(true);
+      }
+      // Check new connection if IP/port, base or ModBusId changed
+      if (['ip', 'port', 'idModBus', 'baseModBus'].some(x => changedKeys.includes(x))) {
+        let newInverter = new SunSpec(newSettings.ip, newSettings.port, newSettings.idModBus, newSettings.baseModBus, this.log);
+        newInverter.on('found', data => {
+          this.log('Result of updated data', data);
+          if (data.found) {
+            this.inverter.closeConnection();
+            delete this.inverter;
+            this.inverter = newInverter;
+          }
+          if (data.found) {
+            resolve(true);
+          } else {
+            reject(new Error('Inverter communication failed'));
+          }
+        })
+      }
+    })
   }
 
   registerEvents() {
@@ -76,11 +82,11 @@ class SunSpecDevice extends Homey.Device {
       this.setCapabilityValue('measure_temperature', value)
         .catch(err => this.error(new Error(err)));
     })
-    this.inverter.on('INV.PPVphAB', value => {
+    this.inverter.on('INV.DCV', value => { // PPVphAB
       this.setCapabilityValue('measure_voltage', value)
         .catch(err => this.error(new Error(err)));
     })
-    this.inverter.on('INV.A', value => {
+    this.inverter.on('INV.DCA', value => { // A
       this.setCapabilityValue('measure_current', value)
         .catch(err => this.error(new Error(err)));
     })
@@ -91,7 +97,7 @@ class SunSpecDevice extends Homey.Device {
     this.inverter.on('measured', value => {
 			if (this.interval === 0) { // external trigger mode
 				this.log('Sending value to DSMR');
-				Homey.ManagerApi.put('/app/nl.dsmr.p1/receive/', { id: id, value: value, err: null }, (err, result) => {
+				this.homey.api.put('/app/nl.dsmr.p1/receive/', { id: id, value: value, err: null }, (err, result) => {
 					this.log('Value sent to DSMR', err, ':', result);
 				});
 			}

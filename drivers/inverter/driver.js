@@ -15,6 +15,7 @@ const SunSpec = require('sunspec-api');
 class SunSpecDriver extends Homey.Driver {
 
 	onInit() {
+		this.inverters = [];
 	};
 
 	onPair(socket) {
@@ -51,7 +52,6 @@ class SunSpecDriver extends Homey.Driver {
 				}
 				socket.emit('found', data);
 			});
-			callback(null, true);
 		});
 
 		// Check if the pairing was finished, otherwise close connection

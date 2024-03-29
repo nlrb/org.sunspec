@@ -1,0 +1,23 @@
+{
+  "name": "org.sunspec",
+  "version": "1.0.0",
+  "description": "Homey app for SunSpec inverters",
+  "main": "api.js",
+  "dependencies": {
+    "sunspec-api": "1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nlrb/org.sunspec.git"
+  },
+  "author": "Ramon Baas",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nlrb/org.sunspec/issues"
+  },
+  "homepage": "https://github.com/nlrb/org.sunspec#readme"
+}
